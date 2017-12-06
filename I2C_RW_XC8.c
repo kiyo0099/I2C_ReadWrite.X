@@ -115,7 +115,6 @@ void putch(unsigned char ch){
 /*! @fn void pic_ini()
 *   @brief PICˆË‘¶‚Ì‰Šú‰»ŠÖ” for 16F1827
 *   @return ‚È‚µ
-*   @details Ú×‚Èà–¾
 */
 void pic_ini(){
 
@@ -320,7 +319,6 @@ uc I2C_read(uc chip, uc subadd){
 
 	I2CStart();
 	res1 = I2COut(chip);		// write mode
-	res2 = I2COut(0x00); 		// sub address
 	res2 = I2COut(subadd); 		// sub address
 	nI2CStart();
 	res3 = I2COut(chip | 0x01);	// read mode
