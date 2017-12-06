@@ -299,6 +299,14 @@ void I2C_write(uc chip, uc subadd, uc data){
 //	 __delay_us(50);			// 遅延
 //	 __delay_ms(10);
 }
+/*! @fn  I2C_write2(uc chip, ui subadd, ui data)
+*   @brief I2Cデバイス書込み関数(サブアドレス対応)
+*   @param chip : I2Cデバイスのアドレス
+*   @param subadd : I2Cデバイスの内部レジスタアドレス(16bit)
+*   @param data : 書き込むデータ(16bit)
+*   @return なし
+*   @details 詳細な説明
+*/
 void I2C_write2(uc chip, ui subadd, ui data){
 	I2CStart();
 	res1 = I2COut(chip);		// write mode
@@ -330,6 +338,14 @@ uc I2C_read(uc chip, uc subadd){
 	__delay_us(30); 			// 遅延
 	return(data);
 }
+
+/*! @fn  I2C_read2(uc chip, ui subadd)
+*   @brief I2Cデバイス読み出し関数(サブアドレス対応)
+*   @param chip : I2Cデバイスのアドレス
+*   @param subadd : I2Cデバイスの内部レジスタアドレス(16bit)
+*   @return data : 読み出した値(16bit)
+*   @details 詳細な説明
+*/
 ui I2C_read2(uc chip, ui subadd){
 	uc ret1,ret2;
 	ui data;
@@ -347,6 +363,13 @@ ui I2C_read2(uc chip, ui subadd){
 	data = ret1<<8 | ret2;
 	return(data);
 }
+/*! @fn  I2C_read3(uc chip, uc subadd)
+*   @brief I2Cデバイス読み出し関数(サブアドレス対応)
+*   @param chip : I2Cデバイスのアドレス
+*   @param subadd : I2Cデバイスの内部レジスタアドレス(8bit)
+*   @return data : 読み出した値(16bit)
+*   @details 詳細な説明
+*/
 ui I2C_read3(uc chip, uc subadd){
 	uc ret1,ret2;
 	ui data;
