@@ -75,7 +75,9 @@ void rs_puts(const uc *buff);/* シリアル文字列の送信 */
 void rs_gets(char *buff);
 void dump(uc sel);									/* Dump関数 */
 void I2C_write(uc chip, uc subadd, uc data);		/* I2Cデバイス書込み関数(サブアドレス対応) */
-uc I2C_read(uc chip, uc subadd);					/* I2Cデバイス読出し関数(サブアドレス対応) */
+uc I2C_read(uc chip, uc subadd);					/* I2Cデバイス読出し関数(サブアドレス8bit, 8bit対応) */
+ui I2C_read2(uc chip, ui subadd);					/* I2Cデバイス読出し関数(サブアドレス16bit, データ16bit対応) */
+ui I2C_read3(uc chip, uc subadd);					/* I2Cデバイス読出し関数(サブアドレス8bit, データ16bit対応) */
 uc rcv_Flag;				/* 文字列受信フラグ(CR+LF) */
 static uc pram_error[] = "paramater error\r\n";	// Error Message
 //uc i2c_add = 0xA0;
@@ -85,7 +87,7 @@ uc timec;
 uc disp_flag;
 //! 入力するコマンドラインの文字列のMax値
 #define MAX_STR			24						// 最大文字数
-static uc Buffer[] = "I2C_PIC v0.4";			// Opening Message
+static uc Buffer[] = "I2C_PIC v0.5";			// Opening Message
 uc res1,res2,res3,res4;
 uc get_str[MAX_STR];		/* 受信文字列用配列 */
 
@@ -269,6 +271,7 @@ void help_list()
 	printf(">i2cwr <chip> <add> <dat> I2C data write.(hex)\r\n");
 	printf(">li2crd <chip> <add>       Lepton I2C data read.(hex)\r\n");
 	printf(">li2cwr <chip> <add> <dat> Lepton I2C data write.(hex)\r\n");
+	printf(">si2crd <chip> <add>      I2C data read(16bit).(hex)\r\n");
 	printf(">eprd <add>               iEEPROM read.(hex)\r\n");
 	printf(">epwr <add> <dat>         iEEPROM write.(hex)\r\n");
 	printf(">dump <sel>               Data Dump.0=I2C,1=iEPROM\r\n");
@@ -337,6 +340,32 @@ ui I2C_read2(uc chip, ui subadd){
 	res2 = I2COut( subadd & 0x00FF); 		// sub address
 	nI2CStart();
 	res3 = I2COut(chip | 0x01);	// read mode
+	ret1 = I2CRcv(0);			// get data with ACK
+	ret2 = I2CRcv(1);			// get data with no ACK
+	I2CStop();
+	__delay_us(30); 			// 遅延
+	data = ret1<<8 | ret2;
+	return(data);
+}
+ui I2C_read3(uc chip, uc subadd){
+	uc ret1,ret2;
+	ui data;
+        ui count;
+
+	I2CStart();
+	res1 = I2COut(chip);		// write mode
+	res2 = I2COut(subadd); 		// sub address
+	nI2CStart();
+	res3 = I2COut(chip | 0x01);	// read mode
+        count=0;
+        while(res3!=0){
+            res3 = I2COut(chip | 0x01);	// read mode
+            count++;
+            if (count>1024)
+                break;
+            else
+                printf("res3=%d, count=%04d\r\n" ,res3, count);
+        }
 	ret1 = I2CRcv(0);			// get data with ACK
 	ret2 = I2CRcv(1);			// get data with no ACK
 	I2CStop();
@@ -430,6 +459,16 @@ void main( void )
 					else{
 //						printf("%s %02x %04x \r\n", com.command, com.param1, com.param2 );
 						read_val = I2C_read2( (uc)com.param1, com.param2);
+						sprintf(temp_str, "val(%d%d%d%d)=0x%04X\r\n", res1, res2, res3, res4, read_val );
+						printf("%s",temp_str);
+					}
+			}
+			else if(!strcmp(  com.command, "si2crd")){
+					if(params != 3)
+							printf("%s", pram_error);
+					else{
+//						printf("%s %02x %04x \r\n", com.command, com.param1, com.param2 );
+						read_val = I2C_read3( (uc)com.param1, (uc)com.param2);
 						sprintf(temp_str, "val(%d%d%d%d)=0x%04X\r\n", res1, res2, res3, res4, read_val );
 						printf("%s",temp_str);
 					}
