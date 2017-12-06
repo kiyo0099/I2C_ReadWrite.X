@@ -549,6 +549,10 @@ void main( void )
                 	printf("test %d\r\n", timec++);
 	}
 }
+/*! @fn buffer_clear()
+*   @brief 受信バッファをクリアする関数
+*   @return なし
+*/
 void buffer_clear(){
     uc i;
 
