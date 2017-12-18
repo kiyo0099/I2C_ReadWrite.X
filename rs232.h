@@ -5,13 +5,13 @@
 *****************************************/
 #include <xc.h>
 
-#define RS232_HW   0       // SW=0. HW=1
+#define RS232_HW   1       // SW=0. HW=1
 /***** ハード設定　****/
 #define BAUD_SW        51      // 9600bps Fosc = 8MHz
 #define BAUD_HW        12      // 9600bps Fosc = 8MHz
 #define DTIME       10      // 検出遅延時間
-#define TXPIN       RA3
-#define RXPIN       RA4
+#define TXPIN       RB5
+#define RXPIN       RB2
 
 /**** 関数プロトタイプ宣言 ****/
 void Send(char code);
