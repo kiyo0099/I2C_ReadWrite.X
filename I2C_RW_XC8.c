@@ -15,14 +15,14 @@
 *               PIC16F1827                                \n
 *               +-----------------------+                 \n
 *           _1__| RA2               RA1 |_18_             \n
-*     AN0_AD_2__| RA3/AN3           RA0 |_17_             \n
-*     AN1_AD_3__| RA4               RA7 |_16_             \n
+*        TX _2__| RA3/AN3           RA0 |_17_             \n
+*        RX _3__| RA4               RA7 |_16_             \n
 *     AN2_AD_4__| RA5/MCLR          RA6 |_15_             \n
 *     AN3_AD_5__| VSS(GND)          VDD |_14_             \n
 *           _6__| RB0               RB7 |_13_             \n
 *    I2C_SDA_7__| RB1/SDA           RB6 |_12_             \n
-*       RX  _8__| RB2/RX         RB5/TX |_11_  TX         \n
-*           _9__| RB3           RB4/SCL |_10_  I2C_SCL    \n
+*           _8__| RB2/RX         RB5/TX |_11_             \n
+*    I2C_SCL_9__| RB3           RB4/SCL |_10_  RST        \n
 *               +-----------------------+                 \n
 * --------------------------------------------------------\n
 **/
@@ -46,48 +46,47 @@
 #define TIMER_INTERVAL (0xffff - 20000) // TMRモジュールのカウント初期値
                                         // 8MHz, 1/1プリスケーラで、10msecごとに割り込みが入る
 #define IEEPROM 1
-#define HELP_DISP 1
+#define HELP_DISP 0
 // config for 16F1827
 // CONFIG1
-    #pragma config FOSC = INTOSC    // Oscillator Selection (INTOSC oscillator: I/O function on CLKIN pin)
-    #pragma config WDTE = OFF       // Watchdog Timer Enable (WDT disabled)
-    #pragma config PWRTE = OFF      // Power-up Timer Enable (PWRT disabled)
-    #pragma config MCLRE = OFF      // MCLR Pin Function Select (MCLR/VPP pin function is digital input)
-    #pragma config CP = OFF         // Flash Program Memory Code Protection (Program memory code protection is disabled)
-    #pragma config CPD = OFF        // Data Memory Code Protection (Data memory code protection is disabled)
-    #pragma config BOREN = OFF      // Brown-out Reset Enable (Brown-out Reset disabled)
-    #pragma config CLKOUTEN = ON    // Clock Out Enable (CLKOUT function is enabled on the CLKOUT pin)
-    #pragma config IESO = OFF       // Internal/External Switchover (Internal/External Switchover mode is disabled)
-    #pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable (Fail-Safe Clock Monitor is disabled)
-    // CONFIG2
-    #pragma config WRT = OFF        // Flash Memory Self-Write Protection (Write protection off)
-    #pragma config PLLEN = OFF      // PLL Enable (4x PLL disabled)
-    #pragma config STVREN = OFF     // Stack Overflow/Underflow Reset Enable (Stack Overflow or Underflow will not cause a Reset)
-    #pragma config BORV = HI        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (Vbor), high trip point selected.)
-    #pragma config LVP = OFF        // Low-Voltage Programming Enable (High-voltage on MCLR/VPP must be used for programming)
-
+#pragma config FOSC = INTOSC    // Oscillator Selection (INTOSC oscillator: I/O function on CLKIN pin)
+#pragma config WDTE = OFF       // Watchdog Timer Enable (WDT disabled)
+#pragma config PWRTE = OFF      // Power-up Timer Enable (PWRT disabled)
+#pragma config MCLRE = OFF      // MCLR Pin Function Select (MCLR/VPP pin function is digital input)
+#pragma config CP = OFF         // Flash Program Memory Code Protection (Program memory code protection is disabled)
+#pragma config CPD = OFF        // Data Memory Code Protection (Data memory code protection is disabled)
+#pragma config BOREN = OFF      // Brown-out Reset Enable (Brown-out Reset disabled)
+#pragma config CLKOUTEN = ON    // Clock Out Enable (CLKOUT function is enabled on the CLKOUT pin)
+#pragma config IESO = OFF       // Internal/External Switchover (Internal/External Switchover mode is disabled)
+#pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable (Fail-Safe Clock Monitor is disabled)
+// CONFIG2
+#pragma config WRT = OFF        // Flash Memory Self-Write Protection (Write protection off)
+#pragma config PLLEN = OFF      // PLL Enable (4x PLL disabled)
+#pragma config STVREN = OFF     // Stack Overflow/Underflow Reset Enable (Stack Overflow or Underflow will not cause a Reset)
+#pragma config BORV = HI        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (Vbor), high trip point selected.)
+#pragma config LVP = OFF        // Low-Voltage Programming Enable (High-voltage on MCLR/VPP must be used for programming)
 
 //関数のプロトタイプ宣言
 void buffer_clear();
 void arg_delay_ms(unsigned int x);
-//void rs_puts(unsigned char *buff);
 void rs_puts(const uc *buff);/* シリアル文字列の送信 */
 void rs_gets(char *buff);
 void dump(uc sel);									/* Dump関数 */
-void I2C_write(uc chip, uc subadd, uc data);		/* I2Cデバイス書込み関数(サブアドレス対応) */
-uc I2C_read(uc chip, uc subadd);					/* I2Cデバイス読出し関数(サブアドレス8bit, 8bit対応) */
+void I2C_write(uc chip, uc subadd, uc data);		/* I2Cデバイス書込み関数(サブアドレス8bit, データ8bit対応) */
+void I2C_write2(uc chip, ui subadd, ui data);		/* I2Cデバイス書込み関数(サブアドレス16bit, データ16bit対応) */
+void I2C_write3(uc chip, uc subadd, ui data);		/* I2Cデバイス書込み関数(サブアドレス8bit, データ16bit対応) */
+uc I2C_read(uc chip, uc subadd);					/* I2Cデバイス読出し関数(サブアドレス8bit, データ8bit対応) */
 ui I2C_read2(uc chip, ui subadd);					/* I2Cデバイス読出し関数(サブアドレス16bit, データ16bit対応) */
 ui I2C_read3(uc chip, uc subadd);					/* I2Cデバイス読出し関数(サブアドレス8bit, データ16bit対応) */
 uc rcv_Flag;				/* 文字列受信フラグ(CR+LF) */
 static uc pram_error[] = "paramater error\r\n";	// Error Message
-//uc i2c_add = 0xA0;
 uc i2c_add = 0x54;
 uc rcv_count;
 uc timec;
 uc disp_flag;
 //! 入力するコマンドラインの文字列のMax値
 #define MAX_STR			24						// 最大文字数
-static uc Buffer[] = "I2C_PIC v0.5";			// Opening Message
+static uc Buffer[] = "I2C_PIC v0.7";			// Opening Message
 uc res1,res2,res3,res4;
 uc get_str[MAX_STR];		/* 受信文字列用配列 */
 
@@ -111,8 +110,8 @@ struct command {
 *   @return なし
 */
 void putch(unsigned char ch){
-    Send(ch);
-   return;
+	Send(ch);
+	return;
 }
 /*! @fn void pic_ini()
 *   @brief PIC依存の初期化関数 for 16F1827
@@ -127,15 +126,15 @@ void pic_ini(){
 	//    0,   0,   1,   1,   0,   1,   0,   1
 	TRISA  = 0x35;          // PortA={0,0,1,1,0,1,0,1}
 	//  RB7, RB6, RB5, RB4, RB3, RB2, RB1, RB0
-	//  Out, Out,  Out, Out,  In,  In, Out,  In
-	//    0,   0,   0,   0,   1,   1,   0,   1
-	TRISB  = 0x0D;          // PortA={0,0,0,0,1,1,0,1}
-        WPUB = 0xFF;
-        ANSELA = 0x00;
-        ANSELB = 0x00;
-        // TX/RX pin select
-        APFCON1bits.TXCKSEL=1;  // 1 = TX/CK function is on RB5
-        APFCON0bits.RXDTSEL=1;  // 1 = RX/DT function is on RB2
+	//  Out, Out, Out, Out, Out,  In, Out,  In
+	//    0,   0,   0,   0,   0,   1,   0,   1
+	TRISB  = 0x05;          // PortA={0,0,0,0,0,1,0,1}
+	WPUB = 0xFF;
+	ANSELA = 0x00;
+	ANSELB = 0x00;
+	// TX/RX pin select
+//	APFCON1bits.TXCKSEL=1;  // 1 = TX/CK function is on RB5
+//	APFCON0bits.RXDTSEL=1;  // 1 = RX/DT function is on RB2
 
 //	ADCON0 = 0x41;
 	INTCONbits.GIE  = 1;    // Grobal interruptを有効にする
@@ -145,26 +144,26 @@ void pic_ini(){
 /* 16 進文字列を 10 進数に変換する */
 int ToDec(char str[ ])
 {
-    int i = 0;        /* 配列の添字として使用 */
-    int n;
-    int x = 0;
-    char c;
+	int i = 0;        /* 配列の添字として使用 */
+	int n;
+	int x = 0;
+	char c;
 
-    while (str[i] != '\0') {        /* 文字列の末尾でなければ */
-            /* '0' から '9' の文字なら */
-        if ('0' <= str[i] && str[i] <= '9')
-            n = str[i] - '0';        /* 数字に変換 */
-            /* 'a' から 'f' の文字なら */
-        else if ('a' <= (c = tolower(str[i])) && c <= 'f')
-            n = c - 'a' + 10;        /* 数字に変換 */
-        else {        /* それ以外の文字なら */
-            printf("error\n");
-            break;        /* プログラムを終了させる */
-        }
-        i++;        /* 次の文字を指す */
-        x = x *16 + n;    /* 桁上がり */
-    }
-   return (x);
+	while (str[i] != '\0') {        /* 文字列の末尾でなければ */
+		    /* '0' から '9' の文字なら */
+		if ('0' <= str[i] && str[i] <= '9')
+			n = str[i] - '0';        /* 数字に変換 */
+			/* 'a' から 'f' の文字なら */
+		else if ('a' <= (c = tolower(str[i])) && c <= 'f')
+			n = c - 'a' + 10;        /* 数字に変換 */
+		else {        /* それ以外の文字なら */
+			printf("error\n");
+			break;        /* プログラムを終了させる */
+		}
+		i++;        /* 次の文字を指す */
+		x = x *16 + n;    /* 桁上がり */
+	}
+	return (x);
 }
 
 /* 文字数をカウントする */
@@ -176,13 +175,13 @@ int strlen_o(const char *src){
 }
 /* 文字列をcopyする */
 void strcopy_o( char *dst, const char *src ){
-    while( *src != '\0' )			//*srcが文字列の終わりでない間は繰り返す
+	while( *src != '\0' )			//*srcが文字列の終わりでない間は繰り返す
 	{
-        *dst = *src;				//1文字コピー
-        dst++;						//コピー先の場所を１つ動かす
-        src++;						//コピー元の場所を１つ動かす
-    }
-    *dst = '\0';					//コピー先の文字列の終わりをセット
+		*dst = *src;				//1文字コピー
+		dst++;						//コピー先の場所を１つ動かす
+		src++;						//コピー元の場所を１つ動かす
+	}
+	*dst = '\0';					//コピー先の文字列の終わりをセット
 }
 /* 16 進文字列を 10 進数に変換する */
 ui A16ToDec(const uc str[ ]){
@@ -264,13 +263,13 @@ int parse(unsigned char *sbuffer, struct command *com)
 */
 void help_list()
 {
-#if HELP_DISP
 	printf("\r\n> %s for 16F1827.\r\n",Buffer);
+#if HELP_DISP
 	printf(">i2cadd <add>             Set I2C address.(hex)\r\n");
 	printf(">i2crd <chip> <add>       I2C data read.(hex)\r\n");
 	printf(">i2cwr <chip> <add> <dat> I2C data write.(hex)\r\n");
-	printf(">li2crd <chip> <add>       Lepton I2C data read.(hex)\r\n");
-	printf(">li2cwr <chip> <add> <dat> Lepton I2C data write.(hex)\r\n");
+	printf(">Li2crd <chip> <add>       Lepton I2C data read.(hex)\r\n");
+	printf(">Li2cwr <chip> <add> <dat> Lepton I2C data write.(hex)\r\n");
 	printf(">si2crd <chip> <add>      I2C data read(16bit).(hex)\r\n");
 	printf(">eprd <add>               iEEPROM read.(hex)\r\n");
 	printf(">epwr <add> <dat>         iEEPROM write.(hex)\r\n");
@@ -318,6 +317,24 @@ void I2C_write2(uc chip, ui subadd, ui data){
 	__delay_us(20);				// 遅延
 	__delay_ms(5);
 }
+/*! @fn  I2C_write3(uc chip, uc subadd, ui data)
+*   @brief I2Cデバイス書込み関数(サブアドレス対応)
+*   @param chip : I2Cデバイスのアドレス
+*   @param subadd : I2Cデバイスの内部レジスタアドレス(8bit)
+*   @param data : 書き込むデータ(16bit)
+*   @return なし
+*   @details 詳細な説明
+*/
+void I2C_write3(uc chip, uc subadd, ui data){
+	I2CStart();
+	res1 = I2COut(chip);		// write mode
+	res2 = I2COut( subadd ); 		// sub address
+	res3 = I2COut((uc)(data>>8));		// data
+	res3 = I2COut((uc)(data & 0x00FF));		// data
+	I2CStop();
+	__delay_us(20);				// 遅延
+	__delay_ms(5);
+}
 /*! @fn  I2C_read(uc chip, uc subadd)
 *   @brief I2Cデバイス読み出し関数(サブアドレス対応)
 *   @param chip : I2Cデバイスのアドレス
@@ -352,15 +369,15 @@ ui I2C_read2(uc chip, ui subadd){
 
 	I2CStart();
 	res1 = I2COut(chip);		// write mode
-	res2 = I2COut((uc)(subadd >> 8)); 		// sub address
-	res2 = I2COut( subadd & 0x00FF); 		// sub address
+	res2 = I2COut((uc)((subadd & 0xFF00) >> 8)); 		// sub address
+	res3 = I2COut((uc)(subadd & 0x00FF)); 		// sub address
 	nI2CStart();
-	res3 = I2COut(chip | 0x01);	// read mode
+	res4 = I2COut(chip | 0x01);	// read mode
 	ret1 = I2CRcv(0);			// get data with ACK
 	ret2 = I2CRcv(1);			// get data with no ACK
 	I2CStop();
 	__delay_us(30); 			// 遅延
-	data = ret1<<8 | ret2;
+	data = (ret1<<8) | ret2;
 	return(data);
 }
 /*! @fn  I2C_read3(uc chip, uc subadd)
@@ -380,15 +397,15 @@ ui I2C_read3(uc chip, uc subadd){
 	res2 = I2COut(subadd); 		// sub address
 	nI2CStart();
 	res3 = I2COut(chip | 0x01);	// read mode
-        count=0;
-        while(res3!=0){
-            res3 = I2COut(chip | 0x01);	// read mode
-            count++;
-            if (count>1024)
-                break;
-            else
-                printf("res3=%d, count=%04d\r\n" ,res3, count);
-        }
+	count=0;
+	while(res3!=0){
+		res3 = I2COut(chip | 0x01);	// read mode
+		count++;
+		if (count>1024)
+			break;
+		else
+			printf("res3=%d, count=%04d\r\n" ,res3, count);
+	}
 	ret1 = I2CRcv(0);			// get data with ACK
 	ret2 = I2CRcv(1);			// get data with no ACK
 	I2CStop();
@@ -441,8 +458,8 @@ void main( void )
 	__delay_ms(1000);
 	// 出力TEST
 	help_list();
-        timec=0;
-	
+	timec=0;
+	RB4=1;
 	while(1){
 		rs_gets(get_str);
 		while(rcv_Flag){
@@ -458,15 +475,6 @@ void main( void )
 							I2C_write( (uc)com.param1, com.param2, com.param3 );
 					}
 			}
-			if(!strcmp( com.command, "li2cwr")){
-					if(params != 4)
-							printf("%s",pram_error);
-					else{
-//							printf("%s %02x %04x %04x\r\n", com.command, com.param1, com.param2 , com.param3);
-							printf("I2C_write(%d%d%d)\r\n", res1, res2, res3);
-							I2C_write2( (uc)com.param1, com.param2, com.param3 );
-					}
-			}
 			else if(!strcmp(  com.command, "i2crd")){
 					if(params != 3)
 							printf("%s", pram_error);
@@ -476,7 +484,16 @@ void main( void )
 							printf("%s",temp_str);
 					}
 			}
-			else if(!strcmp(  com.command, "li2crd")){
+			else if(!strcmp( com.command, "Li2cwr")){
+					if(params != 4)
+							printf("%s",pram_error);
+					else{
+//							printf("%s %02x %04x %04x\r\n", com.command, com.param1, com.param2 , com.param3);
+							printf("I2C_write(%d%d%d)\r\n", res1, res2, res3);
+							I2C_write2( (uc)com.param1, com.param2, com.param3 );
+					}
+			}
+			else if(!strcmp(  com.command, "Li2crd")){
 					if(params != 3)
 							printf("%s", pram_error);
 					else{
@@ -486,7 +503,16 @@ void main( void )
 						printf("%s",temp_str);
 					}
 			}
-			else if(!strcmp(  com.command, "si2crd")){
+			else if(!strcmp( com.command, "Ti2cwr")){
+					if(params != 4)
+							printf("%s",pram_error);
+					else{
+//							printf("%s %02x %04x %04x\r\n", com.command, com.param1, com.param2 , com.param3);
+							printf("I2C_write(%d%d%d)\r\n", res1, res2, res3);
+							I2C_write3( (uc)com.param1, (uc)com.param2, com.param3 );
+					}
+			}
+			else if(!strcmp(  com.command, "Ti2crd")){
 					if(params != 3)
 							printf("%s", pram_error);
 					else{
@@ -525,7 +551,16 @@ void main( void )
 					}
 			}
 #endif
-                        else if(!strcmp( com.command, "dump")){
+            else if(!strcmp( com.command, "rst")){
+					if(params != 2)
+							printf("%s",pram_error);
+					else
+						if(com.param1!=0)
+							RB4 = 1;
+						else
+							RB4 = 0;
+			}
+            else if(!strcmp( com.command, "dump")){
 					if(params != 2)
 							printf("%s",pram_error);
 					else
@@ -534,19 +569,19 @@ void main( void )
 			else if(!strcmp( com.command, "loop")){
 					disp_flag=1;
 			}
-                        else if(!strcmp( com.command, "help")){
+			else if(!strcmp( com.command, "help")){
 					help_list();
-                                        disp_flag=0;
-                                        timec=0;
+					disp_flag=0;
+					timec=0;
 			}
 			else{
 					printf("command error\r\n");
 			}
 			rcv_Flag = 0;				// 受信フラグ・クリア
-                        buffer_clear();
-                }
-                if(disp_flag)
-                	printf("test %d\r\n", timec++);
+			buffer_clear();
+		}
+		if(disp_flag)
+			printf("test %d\r\n", timec++);
 	}
 }
 /*! @fn buffer_clear()
@@ -554,10 +589,10 @@ void main( void )
 *   @return なし
 */
 void buffer_clear(){
-    uc i;
+	uc i;
 
-    for(i=0;i<MAX_STR;i++)
-        get_str[i]=0;
+	for(i=0;i<MAX_STR;i++)
+		get_str[i]=0;
 }
 /*! @fn arg_delay_ms(ui x)
 *   @brief ms単位のwaitする関数
@@ -638,9 +673,9 @@ void dump(uc sel){
 #if IEEPROM
 				read_val = read_int_eeprom( add );
 #else
-                               ;
+				;
 #endif
-                        else
+			else
 				read_val = I2C_read( i2c_add, add );
 			printf("%02X ", read_val);
 			add++;

@@ -11,7 +11,7 @@
 
 /** I/Oピンの設定 **/
 #define	SDA		RB1
-#define	SCL		RB4
+#define	SCL		RB3
 #define TRISSDA 	TRISB1
 
 /** 関数プロトタイピング **/
